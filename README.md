@@ -1,115 +1,172 @@
-MIPS32 Single Cycle Processor
+MIPS32 Single-Cycle Processor (VHDL)
+Descriere proiect
+Acest proiect implementează un procesor MIPS32 cu arhitectură single-cycle (ciclu unic) utilizând VHDL. Procesorul este proiectat modular și este compus din mai multe unități funcționale care formează împreună calea de date și unitatea de control.
+Proiectul a fost realizat și testat în Xilinx Vivado, iar toate componentele au fost verificate prin simulare pentru a asigura funcționarea corectă.
+
+Arhitectura procesorului
+Procesorul este construit din următoarele componente principale:
+•	Generator de monopuls sincron
+•	Afișaj pe 7 segmente
+•	Instruction Fetch
+•	Instruction Decode
+•	Unitatea de control
+•	Execution Unit
+•	Memory Unit
+•	Mediul de test / integrare procesor
+
+Componente și funcționalitate
+1. Generator de Monopuls Sincron (MPG.vhd)
 Descriere
-Acest proiect reprezintă implementarea unui procesor MIPS32 cu ciclu unic (Single Cycle) realizat în VHDL, în cadrul disciplinei Arhitectura Calculatoarelor de la Universitatea Politehnica din București, Facultatea de Automatică și Calculatoare, specializarea Calculatoare și Tehnologia Informației.
-Procesorul implementează o arhitectură MIPS32 architecture pe 32 de biți, în care fiecare instrucțiune este executată într-un singur ciclu de ceas. Proiectul include toate componentele principale ale unui procesor: unitatea de extragere a instrucțiunilor, decodificare, execuție, memorie și unitatea de control.
-Designul a fost realizat și testat utilizând Xilinx Vivado.
-
-Structura proiectului
-Proiectul este împărțit în mai multe module VHDL, fiecare reprezentând o componentă a procesorului.
-1. MPG – Generator de Monopuls Sincron
-Fișier: MPG.vhd
 Generează un impuls sincron la apăsarea unui buton.
-Funcționalitate:
-•	utilizează un numărător
-•	folosește 3 bistabile D Flip-Flop
-•	produce un singur impuls la detectarea unei apăsări de buton
+Funcționalitate
+•	Utilizează un numărător și 3 bistabile D Flip-Flop
+•	Produce un singur impuls pentru fiecare apăsare a butonului
+•	Elimină problemele de debouncing ale butoanelor
 
-2. SSD – Afișaj pe 7 segmente
-Fișier: SSD.vhd
-Controlează afișarea valorilor pe un display cu 7 segmente.
-Funcționalitate:
-•	utilizează 7 LED-uri (catozi activi)
-•	permite afișarea cifrelor prin activarea segmentelor corespunzătoare
-•	afișajul este multiplexat între mai multe display-uri
+2. Afișaj pe 7 segmente (SSD.vhd)
+Descriere
+Permite afișarea valorilor numerice pe un display cu 7 segmente.
+Funcționalitate
+•	Utilizează 7 LED-uri active (catozi)
+•	Catozii sunt comuni pentru toate afișajele
+•	Afișarea este realizată prin multiplexarea segmentelor
 
-3. IFetch – Instruction Fetch
-Fișier: IFetch.vhd
+3. Instruction Fetch Unit (IFetch.vhd)
+Descriere
 Unitatea responsabilă pentru extragerea instrucțiunilor din memoria de instrucțiuni.
-Funcționalitate:
-•	gestionează Program Counter (PC)
-•	calculează PC + 4
-•	furnizează instrucțiunea curentă pentru etapa de decodificare
+Funcționalitate
+•	Primește adresa de salt
+•	Calculează PC + 4
+•	Returnează:
+o	instrucțiunea curentă
+o	adresa următoarei instrucțiuni
 
-4. ID – Instruction Decode
-Fișier: ID.vhd
-Decodează instrucțiunile și pregătește operanzii pentru execuție.
-Funcționalitate:
-•	citește registrele din Register File
-•	generează:
-o	RD1
-o	RD2
-o	Ext_Imm (imediat extins)
-o	câmpurile function și sa
-•	primește valoarea WD pentru scriere în registre
+4. Instruction Decode Unit (ID.vhd)
+Descriere
+Decodează instrucțiunile și pregătește operanzii necesari execuției.
+Funcționalitate
+Primește:
+•	instrucțiunea curentă
+•	valoarea WD (Write Data) pentru registrul RF
+Produce:
+•	RD1
+•	RD2
+•	Ext_Imm (imediat extins)
+•	câmpurile function
+•	sa (shift amount)
 
-5. UC1 – Unitatea de Control
-Fișier: UC1.vhd
-Generează semnalele de control pentru toate unitățile din datapath.
-Funcționalitate:
-•	analizează opcode-ul instrucțiunii
-•	activează semnalele necesare pentru:
-o	ALU
-o	memorie
-o	registre
-o	salturi condiționate
+5. Control Unit (UC1.vhd)
+Descriere
+Generează semnalele de control pentru toate unitățile procesorului.
+Funcționalitate
+Determină comportamentul procesorului în funcție de tipul instrucțiunii.
+Controlează:
+•	scrierea în registri
+•	operația ALU
+•	accesul la memorie
+•	ramificațiile
 
-6. EX – Execution Unit
-Fișier: EX.vhd
-Realizează operațiile aritmetice și logice ale instrucțiunilor.
-Funcționalitate:
-•	execută operații în ALU
-•	primește:
-o	RD1
-o	RD2
-o	Ext_Imm
-o	PC + 4
-•	generează:
-o	rezultatul ALU
-o	semnalul Zero
-o	adresa pentru salt condiționat
+6. Execution Unit (EX.vhd)
+Descriere
+Realizează operațiile aritmetice și logice ale procesorului.
+Funcționalitate
+Primește:
+•	RD1
+•	RD2
+•	Ext_Imm
+•	PC + 4
+Produce:
+•	rezultatul ALU
+•	semnalul Zero
+•	adresa de branch
 
-7. MEM – Memory Unit
-Fișier: MEM.vhd
-Gestionează memoria de date.
-Funcționalitate:
-•	scriere sincronă pe frontul ascendent al ceasului
-•	citire asincronă
-•	suport pentru instrucțiuni de tip load/store
+7. Memory Unit (MEM.vhd)
+Descriere
+Unitatea de memorie pentru date.
+Funcționalitate
+•	Scriere sincronă pe frontul ascendent al ceasului
+•	Citire asincronă
 
-8. test_env – Arhitectura completă
-Fișier: test_env.vhd
-Acest modul integrează toate componentele procesorului pentru a forma arhitectura completă.
-Funcționalitate:
-•	conectează toate modulele
-•	permite testarea funcționalității procesorului
-•	servește ca mediu de simulare
+8. Arhitectura completă a procesorului (test_env.vhd)
+Descriere
+Integrează toate modulele într-un procesor funcțional.
+Funcționalitate
+•	conectează toate componentele
+•	permite testarea procesorului
+•	simulează execuția programelor MIPS
 
-Instrucțiuni implementate
-Procesorul implementează un subset de instrucțiuni MIPS32, inclusiv:
-•	instrucțiuni aritmetice
-•	instrucțiuni logice
-•	instrucțiuni de acces la memorie
-•	instrucțiuni de salt și ramificare
-Pentru fiecare instrucțiune sunt definite semnalele de control corespunzătoare generate de unitatea de control.
-
-Program de test
-Programul de test verifică dacă elementele unui șir sunt ordonate crescător.
-Enunț
-Se consideră un șir de N elemente stocat în memorie începând cu adresa A (A ≥ 12).
-•	A se citește din adresa 0
-•	N se citește din adresa 4
-•	rezultatul este scris la adresa 8
-Rezultat
-•	1 -> șirul este ordonat crescător
-•	0 -> șirul nu este ordonat crescător
-
-Testare și simulare
-Proiectul a fost testat în simulatorul din Xilinx Vivado.
-Pe parcursul dezvoltării au fost întâlnite diverse probleme de proiectare, precum:
+Testarea proiectului
+Toate componentele au fost:
+•	proiectate în VHDL
+•	simulate în Vivado Simulator
+•	verificate pentru funcționare corectă
+În timpul dezvoltării au apărut diverse probleme, precum:
 •	atribuirea incorectă a unor semnale
 •	erori în implementarea programului MIPS
-Acestea au fost identificate și corectate prin simulări succesive.
+•	probleme de sincronizare
+Acestea au fost identificate și corectate progresiv în timpul simulării.
+
+Setul de instrucțiuni implementat
+Procesorul suportă un subset al instrucțiunilor MIPS32, utilizate pentru implementarea și testarea arhitecturii single-cycle.
+Exemple de tipuri de instrucțiuni:
+R-Type
+•	add
+•	sub
+•	and
+•	or
+•	sll
+•	srl
+I-Type
+•	addi
+•	lw
+•	sw
+•	beq
+J-Type
+•	jump
+
+Semnale de control
+Unitatea de control generează semnale pentru:
+•	RegDst
+•	ALUSrc
+•	MemWrite
+•	MemToReg
+•	RegWrite
+•	Branch
+•	Jump
+•	ALUOp
+Aceste semnale determină modul de funcționare al procesorului pentru fiecare instrucțiune.
+
+Program de test
+Pentru testarea procesorului a fost utilizată problema:
+Determinarea ordonării unui șir
+Enunț:
+Se verifică dacă valorile unui șir de N elemente sunt ordonate crescător.
+Organizarea memoriei
+Adresă	Conținut
+0	A (adresa de început a șirului)
+4	N (numărul de elemente)
+8	rezultat (1 = ordonat, 0 = neordonat)
+Condiții:
+•	A ≥ 12
+•	șirul este stocat în memorie începând cu adresa A
+Rezultatul verificării este scris la adresa 8.
 
 Schema RTL
-Proiectul include și schema RTL (Register Transfer Level) a procesorului, care ilustrează conexiunile dintre toate modulele principale ale arhitecturii.
+Procesorul este implementat utilizând o arhitectură RTL (Register Transfer Level) în care toate componentele sunt conectate prin calea de date și semnale de control.
+Schema RTL include:
+•	PC
+•	Instruction Memory
+•	Register File
+•	ALU
+•	Data Memory
+•	Multiplexoare
+•	Control Unit
+
+Tehnologii utilizate
+•	VHDL
+•	MIPS32 Architecture
+•	Xilinx Vivado
+•	RTL Design
+•	Digital Logic Design
+
 
